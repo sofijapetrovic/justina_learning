@@ -2,28 +2,56 @@
 #i onda pretrazi sve fajlove i podfoldere koliko god duboko da ima
 #i sacuva putanje do svih fajlova koje nadje, i grupise ih po ekstenziji
 #i sacuva to u json fajl
-import os,json
+import os
+import json
+import argparse
 
-print("Unesite putanju do foldera za pretrazivanje")
-input_folder = input()
-os.chdir(input_folder)
-mydic={}
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="List all the files from the directory recursively and group them by the "
+                    "extension")
+    parser.add_argument("--dir-path", type=str, default='',
+                        help="Path to the directory with the files")
+    parser.add_argument("--out-json", type=str, default='',
+                        help="Path where to save the json with the file paths")
+    args = parser.parse_args()
 
-for file in os.listdir(input_folder):
-    ext = file.split(".")
-    current_key_item = mydic.get(ext[-1])
-    if (current_key_item == None):
-        mydic[ext[-1]] = [file]
-    else:
-        list_of_files = []
-        for files in current_key_item:
-            list_of_files.append(files)
-        list_of_files.append(file)
-        mydic[ext[-1]] = list_of_files
+    if not os.path.exists(args.dir_path):
+        print(f'The path {args.dir_path} does not exist!')
+        exit(1)
 
-# Serializing json
-json_object = json.dumps(mydic, indent=4)
- 
-# Writing to json file
-with open("zadatak1.json", "w") as outfile:
-    outfile.write(json_object)
+    if not os.path.isdir(args.dir_path):
+        print(f'The path {args.dir_path} is not a directory!')
+        exit(1)
+
+    dirs_to_inspect = [args.dir_path]
+    grouped_files = {}
+
+    while True:
+        if len(dirs_to_inspect) == 0:
+            # no more directories to look into
+            break
+        inspected_dirs = []
+        for dir_path in dirs_to_inspect:
+            files = os.listdir(dir_path) # list files in the directory
+            for file_name in files:
+                file_path = os.path.join(dir_path, file_name) # create full path
+                if os.path.isdir(file_path):
+                    # path is directory
+                    dirs_to_inspect.append(file_path) # add for inspection later
+                else:
+                    # path is a file
+                    extension = file_name.split('.')[-1] # get extension
+                    if extension not in grouped_files: # check whether the key is in the dict
+                        grouped_files[extension] = [] # add new key to the dict
+                    grouped_files[extension].append(file_path) # add the file path
+            inspected_dirs.append(dir_path) # the dir was inspected
+
+        for dir_path in inspected_dirs:
+            dirs_to_inspect.remove(dir_path) # remove inspected directory
+
+    # save the json file
+    with open(args.out_json, "w") as outfile:
+        json.dump(grouped_files, outfile, indent=2)
+
+
