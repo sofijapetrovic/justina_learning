@@ -2,6 +2,7 @@
 #i onda pretrazi sve fajlove i podfoldere koliko god duboko da ima
 #i sacuva putanje do svih fajlova koje nadje, i grupise ih po ekstenziji
 #i sacuva to u json fajl
+# novi komentar
 import os
 import json
 import argparse
