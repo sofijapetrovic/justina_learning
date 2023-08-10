@@ -6,6 +6,8 @@
 import os
 import json
 import argparse
+import random
+import shutil
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -14,7 +16,8 @@ if __name__ == "__main__":
     parser.add_argument("--dir-path", type=str, default='',
                         help="Path to the directory with the files")
     parser.add_argument("--out-json", type=str, default='',
-                        help="Path where to save the json with the file paths")
+                       help="Path where to save the json with the file paths")
+    parser.add_argument("--rand-files-folder", type=str, default='', help="Path to the directory with rand files")
     args = parser.parse_args()
 
     if not os.path.exists(args.dir_path):
@@ -23,6 +26,14 @@ if __name__ == "__main__":
 
     if not os.path.isdir(args.dir_path):
         print(f'The path {args.dir_path} is not a directory!')
+        exit(1)
+
+    if not os.path.exists(args.rand_files_folder):
+        print(f'The path {args.rand_files_folder} does not exist')
+        exit(1)
+
+    if not os.path.isdir(args.rand_files_folder):
+        print(f'The path {args.rand_files_folder} is not directory')
         exit(1)
 
     dirs_to_inspect = [args.dir_path]
@@ -54,5 +65,13 @@ if __name__ == "__main__":
     # save the json file
     with open(args.out_json, "w") as outfile:
         json.dump(grouped_files, outfile, indent=2)
+
+    #print(type(grouped_files['doc']))
+    random_file = ''
+    only_file_name = ''
+    for ext in grouped_files.keys():
+        random_file = random.choice(grouped_files.get(ext)) #get random file from specific key
+        file_path = os.path.join(args.rand_files_folder, random_file.split("\\")[-1]) #join file name of random file and path to new folder
+        shutil.copy(random_file,file_path)
 
 
