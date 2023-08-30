@@ -3,11 +3,17 @@
 #i sacuva putanje do svih fajlova koje nadje, i grupise ih po ekstenziji
 #i sacuva to u json fajl
 # novi komentar
+#3. Zadatak da se vratiš na prethodni commit (iz prvog zadatka) i napraviš tu novu granu justina-dev2.
+# I onda tu dodas u kod da se napravi pandas dataframe sa kolonama [file_name, extension, creation_date]
+# i da se sortira prvo po kolonama ovim redom [extension, creation_date, name] I da se ispiše dataframe.
+
 import os
 import json
 import argparse
 import random
 import shutil
+import pandas
+import time
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -66,12 +72,16 @@ if __name__ == "__main__":
     with open(args.out_json, "w") as outfile:
         json.dump(grouped_files, outfile, indent=2)
 
-    #print(type(grouped_files['doc']))
-    random_file = ''
-    only_file_name = ''
+
+    list_of_dict = []
     for ext in grouped_files.keys():
-        random_file = random.choice(grouped_files.get(ext)) #get random file from specific key
-        file_path = os.path.join(args.rand_files_folder, random_file.split("\\")[-1]) #join file name of random file and path to new folder
-        shutil.copy(random_file,file_path)
+        for file_name in grouped_files.get(ext):
+            creation_date = time.ctime(os.path.getctime(file_name))
+            list_of_dict.append({'file_name':file_name,'extension':ext,'creation_date':creation_date})
+    pd = pandas.DataFrame.from_dict(list_of_dict)
+    pd.sort_values( by = ["extension", "creation_date", "file_name"],         #rows and column names to sort by
+                    axis = 0,           # sort row, axis = 0
+                    ascending = [True,True,True])    #for ascending or descending
 
 
+    print(pd)
