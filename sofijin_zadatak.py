@@ -83,5 +83,10 @@ if __name__ == "__main__":
                     axis = 0,           # sort row, axis = 0
                     ascending = [True,True,True])    #for ascending or descending
 
-
-    print(pd)
+   random_file = ''
+   only_file_name = ''
+   for ext in grouped_files.keys():
+        random_file = random.choice(grouped_files.get(ext)) #get random file from specific key
+        file_path = os.path.join(args.rand_files_folder, random_file.split("\\")[-1]) #join file name of random file and path to new folder
+        shutil.copy(random_file,file_path)
+    
